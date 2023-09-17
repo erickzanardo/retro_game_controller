@@ -1,7 +1,50 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:retro_game_controller/retro_game_controller.dart';
+
+const nesKeyboardController = KeyboardController(
+  controllerId: 'Player1',
+  mapping: {
+    NesButton.up: LogicalKeyboardKey.arrowUp,
+    NesButton.down: LogicalKeyboardKey.arrowDown,
+    NesButton.left: LogicalKeyboardKey.arrowLeft,
+    NesButton.right: LogicalKeyboardKey.arrowRight,
+    NesButton.b: LogicalKeyboardKey.keyZ,
+    NesButton.a: LogicalKeyboardKey.keyX,
+    NesButton.select: LogicalKeyboardKey.keyC,
+    NesButton.start: LogicalKeyboardKey.enter,
+  },
+);
+
+const inScreenController = InScreenController<NesButton>(
+  controllerId: 'Player1',
+  actions: [
+    DpadAction(
+      up: NesButton.up,
+      down: NesButton.down,
+      left: NesButton.left,
+      right: NesButton.right,
+    ),
+    ButtonAction(
+      button: NesButton.b,
+      child: Text('B'),
+    ),
+    ButtonAction(
+      button: NesButton.a,
+      child: Text('A'),
+    ),
+    CenterButtonAction(
+      button: NesButton.select,
+      child: Text('SELECT'),
+    ),
+    CenterButtonAction(
+      button: NesButton.start,
+      child: Text('START'),
+    ),
+  ],
+);
 
 class NesControllerPage extends StatefulWidget {
   const NesControllerPage({super.key});
@@ -21,25 +64,28 @@ class _NesControllerPageState extends State<NesControllerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return RetroGameControllerListerner<NesButton>(
-      mapping: nesMapping,
-      onEvent: ({
-        required NesButton button,
-        required String controllerId,
-        required EventType type,
-      }) {
-        if (type == EventType.down) {
-          setState(() {
-            _pressedButtons.add(button);
-          });
-        } else {
-          setState(() {
-            _pressedButtons.remove(button);
-          });
-        }
-      },
-      child: Scaffold(
-        body: Center(
+    return Scaffold(
+      body: RetroGameControllerListerner<NesButton>(
+        controllers: const [
+          nesKeyboardController,
+          inScreenController,
+        ],
+        onEvent: ({
+          required NesButton button,
+          required String controllerId,
+          required EventType type,
+        }) {
+          if (type == EventType.down) {
+            setState(() {
+              _pressedButtons.add(button);
+            });
+          } else {
+            setState(() {
+              _pressedButtons.remove(button);
+            });
+          }
+        },
+        child: Center(
           child: Container(
             color: const Color(0xFFd8d8da),
             padding: const EdgeInsets.only(

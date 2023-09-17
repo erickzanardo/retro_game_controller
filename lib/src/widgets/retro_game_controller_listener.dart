@@ -20,7 +20,7 @@ class RetroGameControllerListerner<T> extends StatefulWidget {
   const RetroGameControllerListerner({
     required this.child,
     required this.onEvent,
-    required this.mapping,
+    required this.controllers,
     this.focusNode,
     super.key,
   });
@@ -42,7 +42,7 @@ class RetroGameControllerListerner<T> extends StatefulWidget {
   }) onEvent;
 
   /// The mappings of the controllers.
-  final RetroControllerMapping<T> mapping;
+  final List<RetroController<T>> controllers;
 
   @override
   State<RetroGameControllerListerner<T>> createState() =>
@@ -62,15 +62,46 @@ class _RetroGameControllerListernerState<T>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardControllers =
+        widget.controllers.whereType<KeyboardController<T>>();
+
+    final inScreenControllers =
+        widget.controllers.whereType<InScreenController<T>>();
+
+    final child = inScreenControllers.isNotEmpty
+        ? Stack(
+            children: [
+              Positioned(child: widget.child),
+              for (final controller in inScreenControllers)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: InScreenControllerContainer(
+                    controller: controller,
+                    onEvent: (type, button) {
+                      widget.onEvent(
+                        controllerId: controller.controllerId,
+                        type: type,
+                        button: button,
+                      );
+                    },
+                  ),
+                ),
+            ],
+          )
+        : widget.child;
+
     return Focus(
       focusNode: _focusNode,
       onKeyEvent: (_, event) {
-        for (final keyboardMapping in widget.mapping.keyboardMapping) {
-          for (final entry in keyboardMapping.mapping.entries) {
+        for (final controller in keyboardControllers) {
+          for (final entry in controller.mapping.entries) {
             if (entry.value == event.logicalKey) {
               if (event is! KeyRepeatEvent) {
                 widget.onEvent(
-                  controllerId: keyboardMapping.controllerId,
+                  controllerId: controller.controllerId,
                   type: event is KeyDownEvent ? EventType.down : EventType.up,
                   button: entry.key,
                 );
@@ -82,7 +113,7 @@ class _RetroGameControllerListernerState<T>
         }
         return KeyEventResult.ignored;
       },
-      child: widget.child,
+      child: child,
     );
   }
 }

@@ -1,2 +1,2 @@
-export 'mapping/mapping.dart';
+export 'controllers/controllers.dart';
 export 'widgets/widgets.dart';
