@@ -18,6 +18,7 @@ class InScreenController<T> extends RetroController<T> {
     this.buttonPressedColor = const Color(0xFF651d1d),
     this.buttonProportion = .05,
     this.centerButtonProportion = .5,
+    this.opacity = .4,
   });
 
   /// The id of the controller.
@@ -47,6 +48,9 @@ class InScreenController<T> extends RetroController<T> {
   /// The proportion of the center button button relative to result of
   /// [buttonProportion].
   final double centerButtonProportion;
+
+  /// The opacity of the controller in the screen.
+  final double opacity;
 
   /// The actions of the controller.
   final List<InScreenControllerAction<T>> actions;
